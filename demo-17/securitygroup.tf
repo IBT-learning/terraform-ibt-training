@@ -1,7 +1,8 @@
-resource "aws_security_group" "app-prod" {
-  vpc_id      = aws_vpc.main.id
-  name        = "application - production"
-  description = "security group for my app"
+resource "aws_security_group" "allow-ssh-prod" {
+  vpc_id      = module.vpc-prod.vpc_id
+  name        = "allow-ssh"
+  description = "security group that allows ssh and all egress traffic"
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -17,29 +18,31 @@ resource "aws_security_group" "app-prod" {
   }
 
   tags = {
-    Name = "myinstance"
+    Name = "allow-ssh"
   }
 }
 
-resource "aws_security_group" "allow-mariadb" {
-  vpc_id      = aws_vpc.main.id
-  name        = "allow-mariadb"
-  description = "allow-mariadb"
-  ingress {
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
-    security_groups = [aws_security_group.app-prod.id] # allowing access from our example instance
-  }
+resource "aws_security_group" "allow-ssh-dev" {
+  vpc_id      = module.vpc-dev.vpc_id
+  name        = "allow-ssh"
+  description = "security group that allows ssh and all egress traffic"
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    self        = true
   }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
-    Name = "allow-mariadb"
+    Name = "allow-ssh"
   }
 }
 
